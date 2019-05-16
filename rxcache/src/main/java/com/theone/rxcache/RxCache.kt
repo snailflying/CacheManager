@@ -2,7 +2,7 @@ package com.theone.rxcache
 
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
-import com.theone.cache.CacheManager
+import com.theone.cache.ACache
 import com.theone.cache.cache.Cache
 import com.theone.cache.ext.DEFAULT_LIFE_TIME
 import io.reactivex.Observable
@@ -16,7 +16,7 @@ import java.io.Serializable
  * @Date 2019-05-16
  * @Description
  */
-class RxCache @JvmOverloads internal constructor(cache: Cache = CacheManager.getCache()) {
+class RxCache @JvmOverloads internal constructor(cache: Cache = ACache.getCache()) {
 
     private val mCache = cache
 

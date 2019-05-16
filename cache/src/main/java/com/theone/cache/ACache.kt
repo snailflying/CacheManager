@@ -16,7 +16,7 @@ import java.io.File
  * @Date 2019-05-16
  * @Description
  */
-object CacheManager {
+object ACache {
 
     private val mMemoryCacheMap: ArrayMap<String, MemoryCache> = ArrayMap()
     private val mDiskCacheMap: ArrayMap<String, DiskCache> = ArrayMap()
