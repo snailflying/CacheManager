@@ -1,4 +1,4 @@
-package com.theone.cachemanager.encrypt
+package com.theone.cache.encrypt
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -8,7 +8,6 @@ import android.os.Build
 import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
-
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
@@ -19,7 +18,6 @@ import java.security.NoSuchAlgorithmException
  * @Description
  */
 object GenKey {
-
 
     /**
      * SHA加密
@@ -55,9 +53,35 @@ object GenKey {
 
         return strResult
     }
-    public fun getKey(key:String,keySizeInBytes: Int): ByteArray {
-        //加密随机字符串生成AES key
-        return GenKey.SHA("$key#\$Zhi\$D%F^Qiang")!!.substring(0, keySizeInBytes).toByteArray()
+
+    /**
+     * Android ID在8.0后会根据签名计算，各APP不会相同，利用此特性作为key.
+     *
+     * @return Settings.Secure.ANDROID_ID or serial number if not available.
+     */
+    @SuppressLint("HardwareIds")
+    fun getAndroidId(context: Context): String {
+        try {
+            val deviceSerial = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+
+            return if (TextUtils.isEmpty(deviceSerial)) {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O && context.checkSelfPermission(
+                        Manifest.permission.READ_PHONE_STATE
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    Build.getSerial()
+                } else {
+                    Build::class.java.getField("SERIAL").get(null) as String
+                }
+            } else {
+                deviceSerial
+            }
+        } catch (ignored: Exception) {
+            // Fall back  to Android_ID
+        }
+
+        return Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
     }
+
 
 }

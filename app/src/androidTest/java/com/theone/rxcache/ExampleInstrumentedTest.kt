@@ -1,4 +1,4 @@
-package com.theone.cachemanager
+package com.theone.rxcache
 
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4

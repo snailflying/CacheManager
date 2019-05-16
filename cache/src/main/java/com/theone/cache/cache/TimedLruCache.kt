@@ -1,16 +1,15 @@
-package com.theone.cachemanager.cache
+package com.theone.cache.cache
 
 import android.graphics.Bitmap
 import android.support.v4.util.LruCache
-import com.theone.cachemanager.ext.DEFAULT_LIFE_TIME
+import com.theone.cache.ext.DEFAULT_LIFE_TIME
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * 带有过期时间的LruCache
- *
- * @author   theone
- * @version  v1.0.0
- * @since    2018/9/20.
+ * @Author zhiqiang
+ * @Email liuzhiqiang@moretickets.com
+ * @Date 2019-05-16
+ * @Description 带有过期时间的LruCache
  */
 open class TimedLruCache<K, V> @JvmOverloads constructor(maxSize: Int = 1024) {
 

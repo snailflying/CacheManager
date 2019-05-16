@@ -1,6 +1,6 @@
 @file:JvmName("KCacheUtils")
 
-package com.theone.cachemanager.ext
+package com.theone.cache.ext
 
 import android.content.res.Resources
 import android.graphics.Bitmap
@@ -21,9 +21,10 @@ import java.security.NoSuchAlgorithmException
 
 
 /**
- * @author   theone
- * @version  v1.0.0
- * @since    2018/9/20.
+ * @Author zhiqiang
+ * @Email liuzhiqiang@moretickets.com
+ * @Date 2019-05-16
+ * @Description
  */
 
 /**

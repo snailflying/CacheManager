@@ -1,4 +1,4 @@
-package com.theone.cachemanager
+package com.theone.rxcache
 
 import org.junit.Test
 

@@ -1,4 +1,4 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.theone.cachemanager">
+          package="com.theone.cache">
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 </manifest>

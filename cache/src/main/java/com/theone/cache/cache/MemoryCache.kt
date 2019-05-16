@@ -1,17 +1,19 @@
-package com.theone.cachemanager.cache
+package com.theone.cache.cache
 
-import com.theone.cachemanager.ext.DEFAULT_LIFE_TIME
-import com.theone.cachemanager.ext.DEFAULT_MEMORY_MAX_SIZE
-import com.theone.cachemanager.ext.logw
-import com.theone.cachemanager.ext.sizeofAny
+import com.theone.cache.ext.DEFAULT_LIFE_TIME
+import com.theone.cache.ext.DEFAULT_MEMORY_MAX_SIZE
+import com.theone.cache.ext.logw
+import com.theone.cache.ext.sizeofAny
 
 /**
- * @author   theone
- * @version  v1.0.0
- * @since    2018/9/27.
+ * @Author zhiqiang
+ * @Email liuzhiqiang@moretickets.com
+ * @Date 2019-05-16
+ * @Description 带过期时间和加/解密的DiskLruCache
  */
 class MemoryCache @JvmOverloads constructor(memoryMaxSize: Int = DEFAULT_MEMORY_MAX_SIZE
-                                            , mode: SizeMode = SizeMode.Size) {
+                                            , mode: SizeMode = SizeMode.Size
+) {
 
     //内存缓存模式
     var mSizeMode: SizeMode = mode
