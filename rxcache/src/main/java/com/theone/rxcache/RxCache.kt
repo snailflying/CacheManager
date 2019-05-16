@@ -165,10 +165,10 @@ class RxCache @JvmOverloads internal constructor(cache: Cache = ACache.getCache(
      */
     @JvmOverloads
     fun getJsonObj(
-        key: String, defaultValue: JSONObject? = JSONObject(), encrypt: Boolean = mCache.mEncrypt
+        key: String, defaultValue: JSONObject? = JSONObject(), decrypt: Boolean = mCache.mEncrypt
     ): Observable<JSONObject> {
         return toObservable {
-            it.getJsonObj(key, defaultValue, encrypt)
+            it.getJsonObj(key, defaultValue, decrypt)
         }
     }
 
@@ -182,10 +182,10 @@ class RxCache @JvmOverloads internal constructor(cache: Cache = ACache.getCache(
      */
     @JvmOverloads
     fun getJsonArray(
-        key: String, defaultValue: JSONArray? = JSONArray(), encrypt: Boolean = mCache.mEncrypt
+        key: String, defaultValue: JSONArray? = JSONArray(), decrypt: Boolean = mCache.mEncrypt
     ): Observable<JSONArray> {
         return toObservable {
-            it.getJsonArray(key, defaultValue, encrypt)
+            it.getJsonArray(key, defaultValue, decrypt)
         }
     }
 
@@ -199,7 +199,7 @@ class RxCache @JvmOverloads internal constructor(cache: Cache = ACache.getCache(
      */
     @JvmOverloads
     fun getBitmap(
-        key: String, defaultValue: Bitmap? = null, encrypt: Boolean = mCache.mEncrypt
+        key: String, defaultValue: Bitmap? = null, decrypt: Boolean = mCache.mEncrypt
     ): Observable<Bitmap> {
         return toObservable {
             it.getBitmap(key, defaultValue)
@@ -217,10 +217,10 @@ class RxCache @JvmOverloads internal constructor(cache: Cache = ACache.getCache(
      */
     @JvmOverloads
     fun getDrawable(
-        key: String, defaultValue: Drawable? = null, encrypt: Boolean = mCache.mEncrypt
+        key: String, defaultValue: Drawable? = null, decrypt: Boolean = mCache.mEncrypt
     ): Observable<Drawable> {
         return toObservable {
-            it.getDrawable(key, defaultValue, encrypt)
+            it.getDrawable(key, defaultValue, decrypt)
         }
     }
 
@@ -234,10 +234,10 @@ class RxCache @JvmOverloads internal constructor(cache: Cache = ACache.getCache(
      */
     @JvmOverloads
     fun getString(
-        key: String, defaultValue: String = "", encrypt: Boolean = mCache.mEncrypt
+        key: String, defaultValue: String = "", decrypt: Boolean = mCache.mEncrypt
     ): Observable<String> {
         return toObservable {
-            it.getString(key, defaultValue, encrypt)
+            it.getString(key, defaultValue, decrypt)
         }
     }
 
@@ -252,10 +252,10 @@ class RxCache @JvmOverloads internal constructor(cache: Cache = ACache.getCache(
      */
     @JvmOverloads
     fun getByteArray(
-        key: String, defaultValue: ByteArray? = null, encrypt: Boolean = mCache.mEncrypt
+        key: String, defaultValue: ByteArray? = null, decrypt: Boolean = mCache.mEncrypt
     ): Observable<ByteArray> {
         return toObservable {
-            it.getByteArray(key, defaultValue, encrypt)
+            it.getByteArray(key, defaultValue, decrypt)
         }
     }
 
@@ -269,10 +269,10 @@ class RxCache @JvmOverloads internal constructor(cache: Cache = ACache.getCache(
      */
     @JvmOverloads
     fun <T : Serializable> getSerializable(
-        key: String, defaultValue: T? = null, encrypt: Boolean = mCache.mEncrypt
+        key: String, defaultValue: T? = null, decrypt: Boolean = mCache.mEncrypt
     ): Observable<T> {
         return toObservable {
-            it.getSerializable(key, defaultValue, encrypt)
+            it.getSerializable(key, defaultValue, decrypt)
         }
     }
 

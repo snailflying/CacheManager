@@ -27,12 +27,12 @@ class Cache internal constructor(
      * @return JSONObject
      */
     @JvmOverloads
-    fun getJsonObj(key: String, defaultValue: JSONObject? = JSONObject(), encrypt: Boolean = mEncrypt): JSONObject? {
+    fun getJsonObj(key: String, defaultValue: JSONObject? = JSONObject(), decrypt: Boolean = mEncrypt): JSONObject? {
         val value = mMemoryCache.get(key, defaultValue)
         if (value != null) {
             return value
         }
-        return mDiskCache.getJsonObj(key, defaultValue,encrypt)
+        return mDiskCache.getJsonObj(key, defaultValue,decrypt)
     }
 
     /**
@@ -59,12 +59,12 @@ class Cache internal constructor(
      * @return JSONArray object
      */
     @JvmOverloads
-    fun getJsonArray(key: String, defaultValue: JSONArray? = JSONArray(), encrypt: Boolean = mEncrypt): JSONArray? {
+    fun getJsonArray(key: String, defaultValue: JSONArray? = JSONArray(), decrypt: Boolean = mEncrypt): JSONArray? {
         val value = mMemoryCache.get<JSONArray>(key)
         if (value != null) {
             return value
         }
-        return mDiskCache.getJsonArray(key, defaultValue,encrypt)
+        return mDiskCache.getJsonArray(key, defaultValue,decrypt)
     }
 
     /**
@@ -91,7 +91,7 @@ class Cache internal constructor(
      * @return Bitmap object
      */
     @JvmOverloads
-    fun getBitmap(key: String, defaultValue: Bitmap? = null, encrypt: Boolean = mEncrypt): Bitmap? {
+    fun getBitmap(key: String, defaultValue: Bitmap? = null, decrypt: Boolean = mEncrypt): Bitmap? {
         if (mMemoryCache.mSizeMode == MemoryCache.SizeMode.Size) {
             val value = mMemoryCache.get<Bitmap>(key)
             if (value != null) {
@@ -101,7 +101,7 @@ class Cache internal constructor(
             //mode 改变，将已有的bitmap移除
             mMemoryCache.remove(key)
         }
-        return mDiskCache.getBitmap(key, defaultValue,encrypt)
+        return mDiskCache.getBitmap(key, defaultValue,decrypt)
     }
 
     /**
@@ -130,7 +130,7 @@ class Cache internal constructor(
      * @return Drawable Object
      */
     @JvmOverloads
-    fun getDrawable(key: String, defaultValue: Drawable? = null, encrypt: Boolean = mEncrypt): Drawable? {
+    fun getDrawable(key: String, defaultValue: Drawable? = null, decrypt: Boolean = mEncrypt): Drawable? {
         if (mMemoryCache.mSizeMode == MemoryCache.SizeMode.Size) {
             val value = mMemoryCache.get<Drawable>(key)
             if (value != null) {
@@ -139,7 +139,7 @@ class Cache internal constructor(
         } else {
             mMemoryCache.remove(key)
         }
-        return mDiskCache.getDrawable(key, defaultValue,encrypt)
+        return mDiskCache.getDrawable(key, defaultValue,decrypt)
     }
 
     /**
@@ -168,12 +168,12 @@ class Cache internal constructor(
      * @return String object
      */
     @JvmOverloads
-    fun getString(key: String, defaultValue: String = "", encrypt: Boolean = mEncrypt): String {
+    fun getString(key: String, defaultValue: String = "", decrypt: Boolean = mEncrypt): String {
         val value = mMemoryCache.get<String>(key)
         if (value != null) {
             return value
         }
-        return mDiskCache.getString(key, defaultValue,encrypt)
+        return mDiskCache.getString(key, defaultValue,decrypt)
     }
 
     /**
@@ -200,12 +200,12 @@ class Cache internal constructor(
      * @return ByteArray
      */
     @JvmOverloads
-    fun getByteArray(key: String, defaultValue: ByteArray? = null, encrypt: Boolean = mEncrypt): ByteArray? {
+    fun getByteArray(key: String, defaultValue: ByteArray? = null, decrypt: Boolean = mEncrypt): ByteArray? {
         val value = mMemoryCache.get<ByteArray>(key)
         if (value != null) {
             return value
         }
-        return mDiskCache.getByteArray(key, defaultValue,encrypt)
+        return mDiskCache.getByteArray(key, defaultValue,decrypt)
     }
 
 
@@ -233,12 +233,12 @@ class Cache internal constructor(
      * @return Serializable object
      */
     @JvmOverloads
-    fun <T:Serializable> getSerializable(key: String, defaultValue: T? = null, encrypt: Boolean = mEncrypt): T? {
+    fun <T:Serializable> getSerializable(key: String, defaultValue: T? = null, decrypt: Boolean = mEncrypt): T? {
         val value = mMemoryCache.get<T>(key)
         if (value != null) {
             return value
         }
-        return mDiskCache.getSerializable(key, defaultValue,encrypt)
+        return mDiskCache.getSerializable(key, defaultValue,decrypt)
     }
 
 

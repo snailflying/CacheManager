@@ -1,19 +1,15 @@
 package com.theone.cachemanager
 
-import android.Manifest
 import android.os.Bundle
-import android.os.Environment
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
-import com.tbruyelle.rxpermissions2.RxPermissions
 import com.theone.cache.ACache
 import com.theone.cache.encrypt.AesRsaEncrypt
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONArray
 import org.json.JSONException
@@ -78,6 +74,7 @@ class MainActivity : AppCompatActivity() {
 
                 val key1Value = ACache.getCache().getString("key1")
                 val key2Value = ACache.getCache().getString("key2", "default")
+                val key2ValueEncrypt = ACache.getCache().getString("key2", "default",decrypt = false)
                 val key3Value = ACache.getCache().getString("key3", "default")
                 val key4Value = ACache.getCache().getString("key4", "default")
                 val key5Test = ACache.getCache().getSerializable("key5", Test(115, "aaron5"))//可能为null
@@ -85,13 +82,13 @@ class MainActivity : AppCompatActivity() {
                 val key6Test = ACache.getCache().getSerializable("key6", Test(116, "aaron6"), true)
                 val key6Value = if (key6Test == null) "" else key6Test!!.toString()
                 val key7Value = ACache.getCache().getJsonObj("key7")
-                val key8Value = ACache.getCache().getJsonObj("key8", encrypt = true)
+                val key8Value = ACache.getCache().getJsonObj("key8", decrypt = true)
                 val key9Value = ACache.getCache().getJsonArray("key9")
-                val key10Value = ACache.getCache().getJsonArray("key10", encrypt = true)
+                val key10Value = ACache.getCache().getJsonArray("key10", decrypt = true)
                 val key11Value = ACache.getCache().getString("key11")
                 val key12Value = ACache.getCache().getString("key12", "default")
                 val key13Value = ACache.getCache().getString("key13")
-                val key14Test = ACache.getCache().getSerializable("key14", Test(115, "aaron14"))
+                val key14Test = ACache.getCache().getSerializable<Test>("key14")
                 val key14Value = if (key14Test == null) "" else key14Test!!.toString()
                 val key15Value = ACache.getCache().getString("key15", "default")
                 val key16Test = ACache.getCache().getSerializable("key16", Test(115, "aaron16"), true)
@@ -104,7 +101,7 @@ class MainActivity : AppCompatActivity() {
                         + "字符串(默认方式):"
                         + check("测试数据1", key1Value)
                         + "\n"
-                        + "字符串(加密):"
+                        + "字符串(加密):$key2ValueEncrypt"
                         + check("测试数据2", key2Value)
                         + "\n"
                         + "特殊字符串(不加密):"
