@@ -5,7 +5,6 @@ import android.graphics.drawable.Drawable
 import com.jakewharton.disklrucache.DiskLruCache
 import com.theone.cache.encrypt.IEncrypt
 import com.theone.cache.ext.*
-import com.theone.cache.ext.logw
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -25,7 +24,8 @@ class DiskCache @JvmOverloads constructor(
     dictionary: File,
     appVersion: Int,
     maxSize: Long = DEFAULT_DISK_MAX_SIZE,
-    private val encrypt: IEncrypt? = null
+    private val iEncrypt: IEncrypt? = null,
+    private val mEncrypt: Boolean = false
 ) {
 
     private val mTag: String = "DiskCache"
@@ -42,10 +42,10 @@ class DiskCache @JvmOverloads constructor(
      */
     @JvmOverloads
     fun getJsonObj(
-        key: String, defaultValue: JSONObject? = JSONObject()
+        key: String, defaultValue: JSONObject? = JSONObject(), encrypt: Boolean = mEncrypt
     ): JSONObject? {
         return try {
-            JSONObject(getString(key))
+            JSONObject(getString(key, encrypt = encrypt))
         } catch (e: Throwable) {
             logw(mTag, e.toString())
             defaultValue
@@ -63,9 +63,9 @@ class DiskCache @JvmOverloads constructor(
     @JvmOverloads
     fun putJsonObj(
         key: String, jsonObject: JSONObject,
-        lifeTime: Long = DEFAULT_LIFE_TIME
+        lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mEncrypt
     ) {
-        putString(key, jsonObject.toString(), lifeTime)
+        putString(key, jsonObject.toString(), lifeTime, encrypt)
     }
 
     /**
@@ -75,10 +75,10 @@ class DiskCache @JvmOverloads constructor(
      */
     @JvmOverloads
     fun getJsonArray(
-        key: String, defaultValue: JSONArray? = JSONArray()
+        key: String, defaultValue: JSONArray? = JSONArray(), encrypt: Boolean = mEncrypt
     ): JSONArray? {
         return try {
-            JSONArray(getString(key))
+            JSONArray(getString(key, encrypt = encrypt))
         } catch (e: JSONException) {
             logw(mTag, e.toString())
             defaultValue
@@ -95,9 +95,9 @@ class DiskCache @JvmOverloads constructor(
     @JvmOverloads
     fun putJsonArray(
         key: String, jsonArray: JSONArray,
-        lifeTime: Long = DEFAULT_LIFE_TIME
+        lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mEncrypt
     ) {
-        putString(key, jsonArray.toString(), lifeTime)
+        putString(key, jsonArray.toString(), lifeTime, encrypt)
     }
 
     /**
@@ -107,8 +107,8 @@ class DiskCache @JvmOverloads constructor(
      * @param defaultValue default value
      */
     @JvmOverloads
-    fun getBitmap(key: String, defaultValue: Bitmap? = null): Bitmap? {
-        return getByteArray(key, defaultValue?.toByteArray())?.toBitmap()
+    fun getBitmap(key: String, defaultValue: Bitmap? = null, encrypt: Boolean = mEncrypt): Bitmap? {
+        return getByteArray(key, defaultValue?.toByteArray(), encrypt)?.toBitmap()
     }
 
 
@@ -122,9 +122,9 @@ class DiskCache @JvmOverloads constructor(
     @JvmOverloads
     fun putBitmap(
         key: String, bitmap: Bitmap,
-        lifeTime: Long = DEFAULT_LIFE_TIME
+        lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mEncrypt
     ) {
-        putByteArray(key, bitmap.toByteArray(), lifeTime)
+        putByteArray(key, bitmap.toByteArray(), lifeTime, encrypt)
     }
 
     /**
@@ -133,8 +133,8 @@ class DiskCache @JvmOverloads constructor(
      * @param key
      */
     @JvmOverloads
-    fun getDrawable(key: String, defaultValue: Drawable? = null): Drawable? {
-        return getBitmap(key, defaultValue?.toBitmap())?.toDrawable()
+    fun getDrawable(key: String, defaultValue: Drawable? = null, encrypt: Boolean = mEncrypt): Drawable? {
+        return getBitmap(key, defaultValue?.toBitmap(), encrypt)?.toDrawable()
     }
 
     /**
@@ -147,9 +147,9 @@ class DiskCache @JvmOverloads constructor(
     @JvmOverloads
     fun putDrawable(
         key: String, drawable: Drawable,
-        lifeTime: Long = DEFAULT_LIFE_TIME
+        lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mEncrypt
     ) {
-        putBitmap(key, drawable.toBitmap(), lifeTime)
+        putBitmap(key, drawable.toBitmap(), lifeTime, encrypt)
     }
 
     /**
@@ -158,12 +158,12 @@ class DiskCache @JvmOverloads constructor(
      * @param key
      */
     @JvmOverloads
-    fun getString(key: String, defaultValue: String = ""): String {
+    fun getString(key: String, defaultValue: String = "", encrypt: Boolean = mEncrypt): String {
         try {
             val snapshot = get(key) ?: return defaultValue
             val lifeTime = snapshot.getLifeTime()
             if (lifeTime == -1L || System.currentTimeMillis() < lifeTime) {
-                val inputStream = handleOrDecrypt(snapshot) ?: return defaultValue
+                val inputStream = handleOrDecrypt(snapshot, encrypt) ?: return defaultValue
                 return inputStream.readTextAndClose()
             } else {
                 //remove key
@@ -187,11 +187,12 @@ class DiskCache @JvmOverloads constructor(
     @JvmOverloads
     fun putString(
         key: String, string: String,
-        lifeTime: Long = DEFAULT_LIFE_TIME
+        lifeTime: Long = DEFAULT_LIFE_TIME,
+        encrypt: Boolean = mEncrypt
     ) {
         try {
             val editor = diskLruCache.edit(key.md5()) ?: return
-            val outputStream: OutputStream = handleOrEncrypt(editor) ?: return
+            val outputStream: OutputStream = handleOrEncrypt(editor, encrypt) ?: return
             if (writeToString(string, outputStream)) {
                 editor.setLifTime(lifeTime)
                     .commit()
@@ -210,13 +211,13 @@ class DiskCache @JvmOverloads constructor(
      * @param defaultValue default valude
      */
     @JvmOverloads
-    fun getByteArray(key: String, defaultValue: ByteArray? = null): ByteArray? {
+    fun getByteArray(key: String, defaultValue: ByteArray? = null, encrypt: Boolean = mEncrypt): ByteArray? {
         try {
             val snapshot = get(key) ?: return null
             val lifeTime = snapshot.getLifeTime()
             if (lifeTime == DEFAULT_LIFE_TIME || System.currentTimeMillis() < lifeTime) {
                 val byteArrayOutputStream = ByteArrayOutputStream()
-                val inputStream = handleOrDecrypt(snapshot) ?: return defaultValue
+                val inputStream = handleOrDecrypt(snapshot, encrypt) ?: return defaultValue
                 inputStream.use { input ->
                     byteArrayOutputStream.use {
                         input.copyTo(it, 512)
@@ -244,11 +245,13 @@ class DiskCache @JvmOverloads constructor(
     @JvmOverloads
     fun putByteArray(
         key: String, byteArray: ByteArray,
-        lifeTime: Long = DEFAULT_LIFE_TIME
+        lifeTime: Long = DEFAULT_LIFE_TIME,
+        encrypt: Boolean = mEncrypt
+
     ) {
         try {
             val editor = diskLruCache.edit(key.md5()) ?: return
-            val outputStream = handleOrEncrypt(editor) ?: return
+            val outputStream = handleOrEncrypt(editor, encrypt) ?: return
             if (writeToBytes(byteArray, outputStream)) {
                 editor.setLifTime(lifeTime)
                     .commit()
@@ -269,12 +272,12 @@ class DiskCache @JvmOverloads constructor(
      */
     @JvmOverloads
     @Suppress("UNCHECKED_CAST")
-    fun <T> getSerializable(key: String, defaultValue: T? = null): T? {
+    fun <T> getSerializable(key: String, defaultValue: T? = null, encrypt: Boolean = mEncrypt): T? {
         try {
             val snapshot = get(key) ?: return null
             val lifeTime = snapshot.getLifeTime()
             if (lifeTime == DEFAULT_LIFE_TIME || System.currentTimeMillis() < lifeTime) {
-                val inputStream = handleOrDecrypt(snapshot) ?: return defaultValue
+                val inputStream = handleOrDecrypt(snapshot, encrypt) ?: return defaultValue
                 return ObjectInputStream(inputStream)
                     .readObject() as T
             } else {
@@ -301,11 +304,12 @@ class DiskCache @JvmOverloads constructor(
     @JvmOverloads
     fun putSerializable(
         key: String, serializable: Serializable,
-        lifeTime: Long = DEFAULT_LIFE_TIME
+        lifeTime: Long = DEFAULT_LIFE_TIME,
+        encrypt: Boolean = mEncrypt
     ) {
         try {
             val editor = diskLruCache.edit(key.md5()) ?: return
-            val outputStream = handleOrEncrypt(editor) ?: return
+            val outputStream = handleOrEncrypt(editor, encrypt) ?: return
             if (writeToSerializable(serializable, outputStream)) {
                 editor.setLifTime(lifeTime)
                     .commit()
@@ -415,12 +419,15 @@ class DiskCache @JvmOverloads constructor(
      * @param editor editor
      * @param password 加密密码
      */
-    private fun handleOrEncrypt(editor: DiskLruCache.Editor): OutputStream? {
+    private fun handleOrEncrypt(editor: DiskLruCache.Editor, encrypt: Boolean): OutputStream? {
         var outputStream = editor.newOutputStream(0) ?: return null
         //加密
-        initCipher(true)?.run {
-            outputStream = CipherOutputStream(outputStream, this)
+        if (encrypt) {
+            initCipher(true)?.run {
+                outputStream = CipherOutputStream(outputStream, this)
+            }
         }
+
         return outputStream
     }
 
@@ -430,11 +437,13 @@ class DiskCache @JvmOverloads constructor(
      * @param snapshot snapshot
      * @param password 加密密码
      */
-    private fun handleOrDecrypt(snapshot: DiskLruCache.Snapshot): InputStream? {
+    private fun handleOrDecrypt(snapshot: DiskLruCache.Snapshot, encrypt: Boolean): InputStream? {
         //解密
         var inputStream = snapshot.getInputStream(0) ?: return null
-        initCipher(false)?.run {
-            inputStream = CipherInputStream(inputStream, this)
+        if (encrypt) {
+            initCipher(false)?.run {
+                inputStream = CipherInputStream(inputStream, this)
+            }
         }
 
         return inputStream
@@ -448,7 +457,7 @@ class DiskCache @JvmOverloads constructor(
     private fun initCipher(isEncrypt: Boolean): Cipher? {
         return try {
             val mode = if (isEncrypt) Cipher.ENCRYPT_MODE else Cipher.DECRYPT_MODE
-            encrypt?.getCipher(null, mode)
+            iEncrypt?.getCipher(null, mode)
         } catch (e: Exception) {
             logw(mTag, e.toString())
             null

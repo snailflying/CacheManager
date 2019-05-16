@@ -13,7 +13,11 @@ import java.io.Serializable
  * @Date 2019-05-16
  * @Description 轻量的二级缓存，Bitmap Drawable对象不会缓存到内存中
  */
-class Cache internal constructor(private val mMemoryCache: MemoryCache, private val mDiskCache: DiskCache) {
+public class Cache internal constructor(
+    private val mMemoryCache: MemoryCache,
+    private val mDiskCache: DiskCache,
+    val mEncrypt: Boolean = false
+) {
 
     /**
      * 从缓存中读取JSONObject
@@ -23,12 +27,12 @@ class Cache internal constructor(private val mMemoryCache: MemoryCache, private 
      * @return JSONObject
      */
     @JvmOverloads
-    fun getJsonObj(key: String, defaultValue: JSONObject? = JSONObject()): JSONObject? {
+    fun getJsonObj(key: String, defaultValue: JSONObject? = JSONObject(), encrypt: Boolean = mEncrypt): JSONObject? {
         val value = mMemoryCache.get(key, defaultValue)
         if (value != null) {
             return value
         }
-        return mDiskCache.getJsonObj(key, defaultValue)
+        return mDiskCache.getJsonObj(key, defaultValue,encrypt)
     }
 
     /**
@@ -39,11 +43,12 @@ class Cache internal constructor(private val mMemoryCache: MemoryCache, private 
      * @param lifeTime 缓存时长
      */
     @JvmOverloads
-    fun putJsonObj(key: String, jsonObject: JSONObject,
-                   lifeTime: Long = DEFAULT_LIFE_TIME
+    fun putJsonObj(
+        key: String, jsonObject: JSONObject,
+        lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mEncrypt
     ) {
         mMemoryCache.put(key, jsonObject, lifeTime)
-        mDiskCache.putJsonObj(key, jsonObject, lifeTime)
+        mDiskCache.putJsonObj(key, jsonObject, lifeTime,encrypt)
     }
 
     /**
@@ -54,12 +59,12 @@ class Cache internal constructor(private val mMemoryCache: MemoryCache, private 
      * @return JSONArray object
      */
     @JvmOverloads
-    fun getJsonArray(key: String, defaultValue: JSONArray? = JSONArray()): JSONArray? {
+    fun getJsonArray(key: String, defaultValue: JSONArray? = JSONArray(), encrypt: Boolean = mEncrypt): JSONArray? {
         val value = mMemoryCache.get<JSONArray>(key)
         if (value != null) {
             return value
         }
-        return mDiskCache.getJsonArray(key, defaultValue)
+        return mDiskCache.getJsonArray(key, defaultValue,encrypt)
     }
 
     /**
@@ -70,11 +75,12 @@ class Cache internal constructor(private val mMemoryCache: MemoryCache, private 
      * @param lifeTime 缓存时长
      */
     @JvmOverloads
-    fun putJsonArray(key: String, jsonArray: JSONArray,
-                     lifeTime: Long = DEFAULT_LIFE_TIME
+    fun putJsonArray(
+        key: String, jsonArray: JSONArray,
+        lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mEncrypt
     ) {
         mMemoryCache.put(key, jsonArray, lifeTime)
-        mDiskCache.putJsonArray(key, jsonArray, lifeTime)
+        mDiskCache.putJsonArray(key, jsonArray, lifeTime,encrypt)
     }
 
     /**
@@ -85,7 +91,7 @@ class Cache internal constructor(private val mMemoryCache: MemoryCache, private 
      * @return Bitmap object
      */
     @JvmOverloads
-    fun getBitmap(key: String, defaultValue: Bitmap? = null): Bitmap? {
+    fun getBitmap(key: String, defaultValue: Bitmap? = null, encrypt: Boolean = mEncrypt): Bitmap? {
         if (mMemoryCache.mSizeMode == MemoryCache.SizeMode.Size) {
             val value = mMemoryCache.get<Bitmap>(key)
             if (value != null) {
@@ -95,7 +101,7 @@ class Cache internal constructor(private val mMemoryCache: MemoryCache, private 
             //mode 改变，将已有的bitmap移除
             mMemoryCache.remove(key)
         }
-        return mDiskCache.getBitmap(key, defaultValue)
+        return mDiskCache.getBitmap(key, defaultValue,encrypt)
     }
 
     /**
@@ -106,13 +112,14 @@ class Cache internal constructor(private val mMemoryCache: MemoryCache, private 
      * @param lifeTime 缓存时长
      */
     @JvmOverloads
-    fun putBitmap(key: String, bitmap: Bitmap,
-                  lifeTime: Long = DEFAULT_LIFE_TIME
+    fun putBitmap(
+        key: String, bitmap: Bitmap,
+        lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mEncrypt
     ) {
         if (mMemoryCache.mSizeMode == MemoryCache.SizeMode.Size) {
             mMemoryCache.put(key, bitmap, lifeTime)
         }
-        mDiskCache.putBitmap(key, bitmap, lifeTime)
+        mDiskCache.putBitmap(key, bitmap, lifeTime,encrypt)
     }
 
     /**
@@ -123,7 +130,7 @@ class Cache internal constructor(private val mMemoryCache: MemoryCache, private 
      * @return Drawable Object
      */
     @JvmOverloads
-    fun getDrawable(key: String, defaultValue: Drawable? = null): Drawable? {
+    fun getDrawable(key: String, defaultValue: Drawable? = null, encrypt: Boolean = mEncrypt): Drawable? {
         if (mMemoryCache.mSizeMode == MemoryCache.SizeMode.Size) {
             val value = mMemoryCache.get<Drawable>(key)
             if (value != null) {
@@ -132,7 +139,7 @@ class Cache internal constructor(private val mMemoryCache: MemoryCache, private 
         } else {
             mMemoryCache.remove(key)
         }
-        return mDiskCache.getDrawable(key, defaultValue)
+        return mDiskCache.getDrawable(key, defaultValue,encrypt)
     }
 
     /**
@@ -143,13 +150,14 @@ class Cache internal constructor(private val mMemoryCache: MemoryCache, private 
      * @param lifeTime 缓存时长
      */
     @JvmOverloads
-    fun putDrawable(key: String, drawable: Drawable,
-                    lifeTime: Long = DEFAULT_LIFE_TIME
+    fun putDrawable(
+        key: String, drawable: Drawable,
+        lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mEncrypt
     ) {
         if (mMemoryCache.mSizeMode == MemoryCache.SizeMode.Size) {
             mMemoryCache.put(key, drawable, lifeTime)
         }
-        mDiskCache.putDrawable(key, drawable, lifeTime)
+        mDiskCache.putDrawable(key, drawable, lifeTime,encrypt)
     }
 
     /**
@@ -160,12 +168,12 @@ class Cache internal constructor(private val mMemoryCache: MemoryCache, private 
      * @return String object
      */
     @JvmOverloads
-    fun getString(key: String, defaultValue: String = ""): String {
+    fun getString(key: String, defaultValue: String = "", encrypt: Boolean = mEncrypt): String {
         val value = mMemoryCache.get<String>(key)
         if (value != null) {
             return value
         }
-        return mDiskCache.getString(key, defaultValue)
+        return mDiskCache.getString(key, defaultValue,encrypt)
     }
 
     /**
@@ -176,11 +184,12 @@ class Cache internal constructor(private val mMemoryCache: MemoryCache, private 
      * @param lifeTime 缓存时长
      */
     @JvmOverloads
-    fun putString(key: String, string: String,
-                  lifeTime: Long = DEFAULT_LIFE_TIME
+    fun putString(
+        key: String, string: String,
+        lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mEncrypt
     ) {
         mMemoryCache.put(key, string, lifeTime)
-        mDiskCache.putString(key, string, lifeTime)
+        mDiskCache.putString(key, string, lifeTime,encrypt)
     }
 
     /**
@@ -191,12 +200,12 @@ class Cache internal constructor(private val mMemoryCache: MemoryCache, private 
      * @return ByteArray
      */
     @JvmOverloads
-    fun getByteArray(key: String, defaultValue: ByteArray? = null): ByteArray? {
+    fun getByteArray(key: String, defaultValue: ByteArray? = null, encrypt: Boolean = mEncrypt): ByteArray? {
         val value = mMemoryCache.get<ByteArray>(key)
         if (value != null) {
             return value
         }
-        return mDiskCache.getByteArray(key, defaultValue)
+        return mDiskCache.getByteArray(key, defaultValue,encrypt)
     }
 
 
@@ -208,11 +217,12 @@ class Cache internal constructor(private val mMemoryCache: MemoryCache, private 
      * @param lifeTime 缓存时长
      */
     @JvmOverloads
-    fun putByteArray(key: String, byteArray: ByteArray,
-                     lifeTime: Long = DEFAULT_LIFE_TIME
+    fun putByteArray(
+        key: String, byteArray: ByteArray,
+        lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mEncrypt
     ) {
         mMemoryCache.put(key, byteArray, lifeTime)
-        mDiskCache.putByteArray(key, byteArray, lifeTime)
+        mDiskCache.putByteArray(key, byteArray, lifeTime,encrypt)
     }
 
     /**
@@ -223,12 +233,12 @@ class Cache internal constructor(private val mMemoryCache: MemoryCache, private 
      * @return Serializable object
      */
     @JvmOverloads
-    fun <T> getSerializable(key: String, defaultValue: T? = null): T? {
+    fun <T> getSerializable(key: String, defaultValue: T? = null, encrypt: Boolean = mEncrypt): T? {
         val value = mMemoryCache.get<T>(key)
         if (value != null) {
             return value
         }
-        return mDiskCache.getSerializable(key, defaultValue)
+        return mDiskCache.getSerializable(key, defaultValue,encrypt)
     }
 
 
@@ -240,11 +250,12 @@ class Cache internal constructor(private val mMemoryCache: MemoryCache, private 
      * @param lifeTime 缓存时长
      */
     @JvmOverloads
-    fun putSerializable(key: String, serializable: Serializable,
-                        lifeTime: Long = DEFAULT_LIFE_TIME
+    fun putSerializable(
+        key: String, serializable: Serializable,
+        lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mEncrypt
     ) {
         mMemoryCache.put(key, serializable, lifeTime)
-        mDiskCache.putSerializable(key, serializable, lifeTime)
+        mDiskCache.putSerializable(key, serializable, lifeTime,encrypt)
     }
 
     /**

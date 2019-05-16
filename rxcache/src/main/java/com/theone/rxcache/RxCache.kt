@@ -16,9 +16,9 @@ import java.io.Serializable
  * @Date 2019-05-16
  * @Description
  */
-class RxCacheManager @JvmOverloads internal constructor(cache: Cache = CacheManager.getCache()) {
+class RxCache @JvmOverloads internal constructor(cache: Cache = CacheManager.getCache()) {
 
-    private val mCacheManager = cache
+    private val mCache = cache
 
     /*
       --------- putXXX() method -----------
@@ -35,10 +35,10 @@ class RxCacheManager @JvmOverloads internal constructor(cache: Cache = CacheMana
     @JvmOverloads
     fun putJsonObj(
         key: String, jsonObject: JSONObject,
-        lifeTime: Long = DEFAULT_LIFE_TIME
+        lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mCache.mEncrypt
     ): Observable<JSONObject> {
         return toObservable(jsonObject) {
-            it.putJsonObj(key, jsonObject, lifeTime)
+            it.putJsonObj(key, jsonObject, lifeTime, encrypt)
         }
     }
 
@@ -53,10 +53,10 @@ class RxCacheManager @JvmOverloads internal constructor(cache: Cache = CacheMana
     @JvmOverloads
     fun putJsonArray(
         key: String, jsonArray: JSONArray,
-        lifeTime: Long = DEFAULT_LIFE_TIME
+        lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mCache.mEncrypt
     ): Observable<JSONArray> {
         return toObservable(jsonArray) {
-            it.putJsonArray(key, jsonArray, lifeTime)
+            it.putJsonArray(key, jsonArray, lifeTime, encrypt)
         }
     }
 
@@ -71,10 +71,10 @@ class RxCacheManager @JvmOverloads internal constructor(cache: Cache = CacheMana
     @JvmOverloads
     fun putBitmap(
         key: String, bitmap: Bitmap,
-        lifeTime: Long = DEFAULT_LIFE_TIME
+        lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mCache.mEncrypt
     ): Observable<Bitmap> {
         return toObservable(bitmap) {
-            it.putBitmap(key, bitmap, lifeTime)
+            it.putBitmap(key, bitmap, lifeTime, encrypt)
         }
     }
 
@@ -89,10 +89,10 @@ class RxCacheManager @JvmOverloads internal constructor(cache: Cache = CacheMana
     @JvmOverloads
     fun putDrawable(
         key: String, drawable: Drawable,
-        lifeTime: Long = DEFAULT_LIFE_TIME
+        lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mCache.mEncrypt
     ): Observable<Drawable> {
         return toObservable(drawable) {
-            it.putDrawable(key, drawable, lifeTime)
+            it.putDrawable(key, drawable, lifeTime, encrypt)
         }
     }
 
@@ -107,7 +107,7 @@ class RxCacheManager @JvmOverloads internal constructor(cache: Cache = CacheMana
     @JvmOverloads
     fun putString(
         key: String, string: String,
-        lifeTime: Long = DEFAULT_LIFE_TIME
+        lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mCache.mEncrypt
     ): Observable<String> {
         return toObservable(string) {
             it.putString(key, string, lifeTime)
@@ -125,10 +125,10 @@ class RxCacheManager @JvmOverloads internal constructor(cache: Cache = CacheMana
     @JvmOverloads
     fun putByteArray(
         key: String, byteArray: ByteArray,
-        lifeTime: Long = DEFAULT_LIFE_TIME
+        lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mCache.mEncrypt
     ): Observable<ByteArray> {
         return toObservable(byteArray) {
-            it.putByteArray(key, byteArray, lifeTime)
+            it.putByteArray(key, byteArray, lifeTime, encrypt)
         }
     }
 
@@ -143,10 +143,10 @@ class RxCacheManager @JvmOverloads internal constructor(cache: Cache = CacheMana
     @JvmOverloads
     fun putSerializable(
         key: String, serializable: Serializable,
-        lifeTime: Long = DEFAULT_LIFE_TIME
+        lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mCache.mEncrypt
     ): Observable<Serializable> {
         return toObservable(serializable) {
-            it.putSerializable(key, serializable, lifeTime)
+            it.putSerializable(key, serializable, lifeTime, encrypt)
         }
     }
 
@@ -165,10 +165,10 @@ class RxCacheManager @JvmOverloads internal constructor(cache: Cache = CacheMana
      */
     @JvmOverloads
     fun getJsonObj(
-        key: String, defaultValue: JSONObject? = JSONObject()
+        key: String, defaultValue: JSONObject? = JSONObject(), encrypt: Boolean = mCache.mEncrypt
     ): Observable<JSONObject> {
         return toObservable {
-            it.getJsonObj(key, defaultValue)
+            it.getJsonObj(key, defaultValue, encrypt)
         }
     }
 
@@ -182,10 +182,10 @@ class RxCacheManager @JvmOverloads internal constructor(cache: Cache = CacheMana
      */
     @JvmOverloads
     fun getJsonArray(
-        key: String, defaultValue: JSONArray? = JSONArray()
+        key: String, defaultValue: JSONArray? = JSONArray(), encrypt: Boolean = mCache.mEncrypt
     ): Observable<JSONArray> {
         return toObservable {
-            it.getJsonArray(key, defaultValue)
+            it.getJsonArray(key, defaultValue, encrypt)
         }
     }
 
@@ -199,7 +199,7 @@ class RxCacheManager @JvmOverloads internal constructor(cache: Cache = CacheMana
      */
     @JvmOverloads
     fun getBitmap(
-        key: String, defaultValue: Bitmap? = null
+        key: String, defaultValue: Bitmap? = null, encrypt: Boolean = mCache.mEncrypt
     ): Observable<Bitmap> {
         return toObservable {
             it.getBitmap(key, defaultValue)
@@ -217,10 +217,10 @@ class RxCacheManager @JvmOverloads internal constructor(cache: Cache = CacheMana
      */
     @JvmOverloads
     fun getDrawable(
-        key: String, defaultValue: Drawable? = null
+        key: String, defaultValue: Drawable? = null, encrypt: Boolean = mCache.mEncrypt
     ): Observable<Drawable> {
         return toObservable {
-            it.getDrawable(key, defaultValue)
+            it.getDrawable(key, defaultValue, encrypt)
         }
     }
 
@@ -234,10 +234,10 @@ class RxCacheManager @JvmOverloads internal constructor(cache: Cache = CacheMana
      */
     @JvmOverloads
     fun getString(
-        key: String, defaultValue: String = ""
+        key: String, defaultValue: String = "", encrypt: Boolean = mCache.mEncrypt
     ): Observable<String> {
         return toObservable {
-            it.getString(key, defaultValue)
+            it.getString(key, defaultValue, encrypt)
         }
     }
 
@@ -252,10 +252,10 @@ class RxCacheManager @JvmOverloads internal constructor(cache: Cache = CacheMana
      */
     @JvmOverloads
     fun getByteArray(
-        key: String, defaultValue: ByteArray? = null
+        key: String, defaultValue: ByteArray? = null, encrypt: Boolean = mCache.mEncrypt
     ): Observable<ByteArray> {
         return toObservable {
-            it.getByteArray(key, defaultValue)
+            it.getByteArray(key, defaultValue, encrypt)
         }
     }
 
@@ -269,10 +269,10 @@ class RxCacheManager @JvmOverloads internal constructor(cache: Cache = CacheMana
      */
     @JvmOverloads
     fun <T : Any> getSerializable(
-        key: String, defaultValue: T? = null
+        key: String, defaultValue: T? = null, encrypt: Boolean = mCache.mEncrypt
     ): Observable<T> {
         return toObservable {
-            it.getSerializable(key, defaultValue)
+            it.getSerializable(key, defaultValue, encrypt)
         }
     }
 
@@ -281,7 +281,7 @@ class RxCacheManager @JvmOverloads internal constructor(cache: Cache = CacheMana
      */
     private fun <T : Any> toObservable(block: (Cache) -> T?): Observable<T> {
         return Observable.create<T> {
-            val value = block(mCacheManager)
+            val value = block(mCache)
             if (value != null) {
                 it.onNext(value)
             } else {
@@ -296,8 +296,16 @@ class RxCacheManager @JvmOverloads internal constructor(cache: Cache = CacheMana
      */
     private fun <T> toObservable(emitterValue: T, block: (Cache) -> Unit): Observable<T> {
         return Observable.create {
-            block(mCacheManager)
+            block(mCache)
             it.onNext(emitterValue)
         }
     }
+
+}
+
+/**
+ * Rx支持
+ */
+fun Cache.toObservable(): RxCache {
+    return RxCache(this)
 }

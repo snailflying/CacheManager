@@ -25,17 +25,25 @@ object CacheManager {
     private var mAppVersion: Int = 1
     private var mDiskMaxSize: Long = DEFAULT_DISK_MAX_SIZE
 
-    private var mEncrypt: IEncrypt? = null
+    private var mEncryptStrategy: IEncrypt? = null
+    private var mEncrypt: Boolean = false
 
     /**
      * 初始化默认的缓存参数
      */
     @JvmStatic
-    fun init(cachePath: String, appVersion: Int, diskMaxSize: Long, encrypt: IEncrypt? = null) {
+    fun init(
+        cachePath: String,
+        appVersion: Int,
+        diskMaxSize: Long,
+        encryptStrategy: IEncrypt? = null,
+        encrypt: Boolean = true
+    ) {
         mCachePath = cachePath
         mAppVersion = appVersion
         mDiskMaxSize = diskMaxSize
-        mEncrypt = encrypt
+        mEncryptStrategy = encryptStrategy
+        mEncrypt = encrypt;
     }
 
     /**
@@ -45,12 +53,12 @@ object CacheManager {
     @JvmOverloads
     fun getCache(
         memoryCache: MemoryCache = getMemoryCache(),
-        diskCache: DiskCache = getDiskCache(encrypt = mEncrypt)
+        diskCache: DiskCache = getDiskCache(encryptStrategy = mEncryptStrategy, encrypt = mEncrypt)
     ): Cache {
         val cacheKey = "$memoryCache._$diskCache"
         val cacheManager = M_CACHE_MAP[cacheKey]
         return if (cacheManager == null) {
-            val newCacheManager = Cache(memoryCache, diskCache)
+            val newCacheManager = Cache(memoryCache, diskCache, mEncrypt)
             M_CACHE_MAP[cacheKey] = newCacheManager
             newCacheManager
         } else cacheManager
@@ -92,7 +100,8 @@ object CacheManager {
     fun getDiskCache(
         diskCachePath: String = mCachePath, appVersion: Int = mAppVersion,
         diskMaxSize: Long = mDiskMaxSize,
-        encrypt: IEncrypt? = null
+        encryptStrategy: IEncrypt? = null,
+        encrypt: Boolean = mEncrypt
     ): DiskCache {
         val cacheFile = File(diskCachePath)
         val cacheKey = "${diskCachePath}_$diskMaxSize"
@@ -100,12 +109,12 @@ object CacheManager {
             val diskCache = mDiskCacheMap[cacheKey]
             return if (diskCache == null) {
                 val newDiskCache =
-                    DiskCache(File(diskCachePath), appVersion, diskMaxSize, encrypt)
+                    DiskCache(File(diskCachePath), appVersion, diskMaxSize, encryptStrategy, encrypt)
                 mDiskCacheMap[cacheKey] = newDiskCache
                 newDiskCache
             } else diskCache
         }
-        val disk = DiskCache(File(diskCachePath), appVersion, diskMaxSize, encrypt)
+        val disk = DiskCache(File(diskCachePath), appVersion, diskMaxSize, encryptStrategy, encrypt)
         mDiskCacheMap[cacheKey] = disk
         return disk
     }
