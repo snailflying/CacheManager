@@ -21,7 +21,7 @@ object ACache {
     private val mMemoryCacheMap: ArrayMap<String, MemoryCache> = ArrayMap()
     private val mDiskCacheMap: ArrayMap<String, DiskCache> = ArrayMap()
     private val M_CACHE_MAP: ArrayMap<String, Cache> = ArrayMap()
-    private var mCachePath: String = Environment.getDownloadCacheDirectory().absolutePath + "/DiskCache"
+    private var mCachePath: String = Environment.getExternalStorageDirectory().absolutePath + "/ACache"
     private var mAppVersion: Int = 1
     private var mDiskMaxSize: Long = DEFAULT_DISK_MAX_SIZE
 
@@ -33,7 +33,7 @@ object ACache {
      */
     @JvmStatic
     fun init(
-        cachePath: String = Environment.getDownloadCacheDirectory().absolutePath + "/ACache",
+        cachePath: String,
         appVersion: Int = 1,
         diskMaxSize: Long= DEFAULT_DISK_MAX_SIZE,
         encryptStrategy: IEncrypt?,

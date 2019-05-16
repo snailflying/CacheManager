@@ -35,7 +35,7 @@ open class TimedLruCache<K, V> @JvmOverloads constructor(maxSize: Int = 1024) {
      * @param lifeTime 有效时间
      */
     @Synchronized
-    fun put(key: K, value: V, lifeTime: Long = DEFAULT_LIFE_TIME): V? {
+    fun put(key: K, value: V?, lifeTime: Long = DEFAULT_LIFE_TIME): V? {
         if (key != null && value != null) {
             val oldValue: V? = lruCache.put(key, value)
             mLifeTimeMap[key] =

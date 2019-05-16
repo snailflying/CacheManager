@@ -29,10 +29,17 @@ class DiskCache @JvmOverloads constructor(
 ) {
 
     private val mTag: String = "DiskCache"
-    private val diskLruCache: DiskLruCache = DiskLruCache.open(
-        dictionary,
-        appVersion, 2, maxSize
-    )
+    private val diskLruCache: DiskLruCache
+
+    init {
+        if (!dictionary.exists()){
+            dictionary.mkdirs()
+        }
+        diskLruCache = DiskLruCache.open(
+            dictionary,
+            appVersion, 2, maxSize
+        )
+    }
 
 
     /**
@@ -62,10 +69,10 @@ class DiskCache @JvmOverloads constructor(
      */
     @JvmOverloads
     fun putJsonObj(
-        key: String, jsonObject: JSONObject,
+        key: String, jsonObject: JSONObject?,
         lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mEncrypt
     ) {
-        putString(key, jsonObject.toString(), lifeTime, encrypt)
+        putString(key, jsonObject?.toString(), lifeTime, encrypt)
     }
 
     /**
@@ -94,10 +101,10 @@ class DiskCache @JvmOverloads constructor(
      */
     @JvmOverloads
     fun putJsonArray(
-        key: String, jsonArray: JSONArray,
+        key: String, jsonArray: JSONArray?,
         lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mEncrypt
     ) {
-        putString(key, jsonArray.toString(), lifeTime, encrypt)
+        putString(key, jsonArray?.toString(), lifeTime, encrypt)
     }
 
     /**
@@ -121,10 +128,10 @@ class DiskCache @JvmOverloads constructor(
      */
     @JvmOverloads
     fun putBitmap(
-        key: String, bitmap: Bitmap,
+        key: String, bitmap: Bitmap?,
         lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mEncrypt
     ) {
-        putByteArray(key, bitmap.toByteArray(), lifeTime, encrypt)
+        putByteArray(key, bitmap?.toByteArray(), lifeTime, encrypt)
     }
 
     /**
@@ -146,10 +153,10 @@ class DiskCache @JvmOverloads constructor(
      */
     @JvmOverloads
     fun putDrawable(
-        key: String, drawable: Drawable,
+        key: String, drawable: Drawable?,
         lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mEncrypt
     ) {
-        putBitmap(key, drawable.toBitmap(), lifeTime, encrypt)
+        putBitmap(key, drawable?.toBitmap(), lifeTime, encrypt)
     }
 
     /**
@@ -186,7 +193,7 @@ class DiskCache @JvmOverloads constructor(
      */
     @JvmOverloads
     fun putString(
-        key: String, string: String,
+        key: String, string: String?,
         lifeTime: Long = DEFAULT_LIFE_TIME,
         encrypt: Boolean = mEncrypt
     ) {
@@ -244,7 +251,7 @@ class DiskCache @JvmOverloads constructor(
      */
     @JvmOverloads
     fun putByteArray(
-        key: String, byteArray: ByteArray,
+        key: String, byteArray: ByteArray?,
         lifeTime: Long = DEFAULT_LIFE_TIME,
         encrypt: Boolean = mEncrypt
 
@@ -303,7 +310,7 @@ class DiskCache @JvmOverloads constructor(
      */
     @JvmOverloads
     fun putSerializable(
-        key: String, serializable: Serializable,
+        key: String, serializable: Serializable?,
         lifeTime: Long = DEFAULT_LIFE_TIME,
         encrypt: Boolean = mEncrypt
     ) {
@@ -374,7 +381,8 @@ class DiskCache @JvmOverloads constructor(
     /**
      * OutputStream写入String类型数据
      */
-    private fun writeToString(value: String, os: OutputStream): Boolean {
+    private fun writeToString(value: String?, os: OutputStream): Boolean {
+        if (value == null) return false
         BufferedWriter(OutputStreamWriter(os))
             .use({
                 it.write(value)
@@ -387,7 +395,8 @@ class DiskCache @JvmOverloads constructor(
     /**
      * OutputStream写入ByteArray
      */
-    private fun writeToBytes(byteArray: ByteArray, os: OutputStream): Boolean {
+    private fun writeToBytes(byteArray: ByteArray?, os: OutputStream): Boolean {
+        if (byteArray == null) return false
         os.use({
             it.write(byteArray)
             it.flush()
@@ -403,7 +412,8 @@ class DiskCache @JvmOverloads constructor(
      * @param serializable serializable
      * @param os outputStream
      */
-    private fun writeToSerializable(serializable: Serializable, os: OutputStream): Boolean {
+    private fun writeToSerializable(serializable: Serializable?, os: OutputStream): Boolean {
+        if (serializable == null) return false
         ObjectOutputStream(os).use({
             it.writeObject(serializable)
             it.flush()

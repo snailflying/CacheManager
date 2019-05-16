@@ -59,7 +59,7 @@ class MemoryCache @JvmOverloads constructor(memoryMaxSize: Int = DEFAULT_MEMORY_
      * @param lifeTime
      */
     @JvmOverloads
-    fun put(key: String, value: Any, lifeTime: Long = DEFAULT_LIFE_TIME) {
+    fun put(key: String, value: Any?, lifeTime: Long = DEFAULT_LIFE_TIME) {
         mLruCache.put(key, value, lifeTime)
     }
 

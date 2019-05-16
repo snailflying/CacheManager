@@ -268,7 +268,7 @@ class RxCache @JvmOverloads internal constructor(cache: Cache = ACache.getCache(
      * @return Serializable object
      */
     @JvmOverloads
-    fun <T : Any> getSerializable(
+    fun <T : Serializable> getSerializable(
         key: String, defaultValue: T? = null, encrypt: Boolean = mCache.mEncrypt
     ): Observable<T> {
         return toObservable {

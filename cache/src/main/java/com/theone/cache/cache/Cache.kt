@@ -13,7 +13,7 @@ import java.io.Serializable
  * @Date 2019-05-16
  * @Description 轻量的二级缓存，Bitmap Drawable对象不会缓存到内存中
  */
-public class Cache internal constructor(
+class Cache internal constructor(
     private val mMemoryCache: MemoryCache,
     private val mDiskCache: DiskCache,
     val mEncrypt: Boolean = false
@@ -44,7 +44,7 @@ public class Cache internal constructor(
      */
     @JvmOverloads
     fun putJsonObj(
-        key: String, jsonObject: JSONObject,
+        key: String, jsonObject: JSONObject?,
         lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mEncrypt
     ) {
         mMemoryCache.put(key, jsonObject, lifeTime)
@@ -76,7 +76,7 @@ public class Cache internal constructor(
      */
     @JvmOverloads
     fun putJsonArray(
-        key: String, jsonArray: JSONArray,
+        key: String, jsonArray: JSONArray?,
         lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mEncrypt
     ) {
         mMemoryCache.put(key, jsonArray, lifeTime)
@@ -113,7 +113,7 @@ public class Cache internal constructor(
      */
     @JvmOverloads
     fun putBitmap(
-        key: String, bitmap: Bitmap,
+        key: String, bitmap: Bitmap?,
         lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mEncrypt
     ) {
         if (mMemoryCache.mSizeMode == MemoryCache.SizeMode.Size) {
@@ -151,7 +151,7 @@ public class Cache internal constructor(
      */
     @JvmOverloads
     fun putDrawable(
-        key: String, drawable: Drawable,
+        key: String, drawable: Drawable?,
         lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mEncrypt
     ) {
         if (mMemoryCache.mSizeMode == MemoryCache.SizeMode.Size) {
@@ -218,7 +218,7 @@ public class Cache internal constructor(
      */
     @JvmOverloads
     fun putByteArray(
-        key: String, byteArray: ByteArray,
+        key: String, byteArray: ByteArray?,
         lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mEncrypt
     ) {
         mMemoryCache.put(key, byteArray, lifeTime)
@@ -233,7 +233,7 @@ public class Cache internal constructor(
      * @return Serializable object
      */
     @JvmOverloads
-    fun <T> getSerializable(key: String, defaultValue: T? = null, encrypt: Boolean = mEncrypt): T? {
+    fun <T:Serializable> getSerializable(key: String, defaultValue: T? = null, encrypt: Boolean = mEncrypt): T? {
         val value = mMemoryCache.get<T>(key)
         if (value != null) {
             return value
@@ -251,7 +251,7 @@ public class Cache internal constructor(
      */
     @JvmOverloads
     fun putSerializable(
-        key: String, serializable: Serializable,
+        key: String, serializable: Serializable?,
         lifeTime: Long = DEFAULT_LIFE_TIME, encrypt: Boolean = mEncrypt
     ) {
         mMemoryCache.put(key, serializable, lifeTime)
