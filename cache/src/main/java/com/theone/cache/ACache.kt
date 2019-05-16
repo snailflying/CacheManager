@@ -1,7 +1,6 @@
 package com.theone.cache
 
 import android.os.Environment
-import android.support.v4.util.ArrayMap
 import com.theone.cache.cache.Cache
 import com.theone.cache.cache.DiskCache
 import com.theone.cache.cache.MemoryCache
@@ -18,9 +17,9 @@ import java.io.File
  */
 object ACache {
 
-    private val mMemoryCacheMap: ArrayMap<String, MemoryCache> = ArrayMap()
-    private val mDiskCacheMap: ArrayMap<String, DiskCache> = ArrayMap()
-    private val M_CACHE_MAP: ArrayMap<String, Cache> = ArrayMap()
+    private var mMemoryCache: MemoryCache? = null
+    private var mDiskCache: DiskCache? = null
+    private var cache: Cache? = null
     private var mCachePath: String = Environment.getExternalStorageDirectory().absolutePath + "/ACache"
     private var mAppVersion: Int = 1
     private var mDiskMaxSize: Long = DEFAULT_DISK_MAX_SIZE
@@ -35,7 +34,7 @@ object ACache {
     fun init(
         cachePath: String,
         appVersion: Int = 1,
-        diskMaxSize: Long= DEFAULT_DISK_MAX_SIZE,
+        diskMaxSize: Long = DEFAULT_DISK_MAX_SIZE,
         encryptStrategy: IEncrypt?,
         encrypt: Boolean = true
     ) {
@@ -55,41 +54,23 @@ object ACache {
         memoryCache: MemoryCache = getMemoryCache(),
         diskCache: DiskCache = getDiskCache(encryptStrategy = mEncryptStrategy, encrypt = mEncrypt)
     ): Cache {
-        val cacheKey = "$memoryCache._$diskCache"
-        val cacheManager = M_CACHE_MAP[cacheKey]
-        return if (cacheManager == null) {
-            val newCacheManager = Cache(memoryCache, diskCache, mEncrypt)
-            M_CACHE_MAP[cacheKey] = newCacheManager
-            newCacheManager
-        } else cacheManager
-    }
-
-    /**
-     * 获取或者创建MemoryCache对象
-     */
-    @JvmOverloads
-    @JvmStatic
-    fun getMemoryCache(
-        memoryMaxSize: Int = DEFAULT_MEMORY_MAX_SIZE,
-        mode: MemoryCache.SizeMode = MemoryCache.SizeMode.Size
-    ): MemoryCache {
-        return getMemoryCache(memoryMaxSize.toString(), memoryMaxSize, mode)
+        return if (cache == null) {
+            cache = Cache(memoryCache, diskCache, mEncrypt)
+            cache!!
+        } else cache!!
     }
 
     /**
      * 获取或者创建MemoryCache对象
      */
     @JvmStatic
-    fun getMemoryCache(
-        cacheKey: String, memoryMaxSize: Int = DEFAULT_MEMORY_MAX_SIZE,
+    fun getMemoryCache(memoryMaxSize: Int = DEFAULT_MEMORY_MAX_SIZE,
         mode: MemoryCache.SizeMode = MemoryCache.SizeMode.Size
     ): MemoryCache {
-        val memoryCache = mMemoryCacheMap[cacheKey]
-        return if (memoryCache == null) {
-            val newMemoryCache = MemoryCache(memoryMaxSize, mode)
-            mMemoryCacheMap[cacheKey] = newMemoryCache
-            newMemoryCache
-        } else memoryCache
+        return if (mMemoryCache == null) {
+            mMemoryCache = MemoryCache(memoryMaxSize, mode)
+            mMemoryCache!!
+        } else mMemoryCache!!
     }
 
     /**
@@ -104,19 +85,18 @@ object ACache {
         encrypt: Boolean = mEncrypt
     ): DiskCache {
         val cacheFile = File(diskCachePath)
-        val cacheKey = "${diskCachePath}_$diskMaxSize"
         if (cacheFile.exists()) {
-            val diskCache = mDiskCacheMap[cacheKey]
-            return if (diskCache == null) {
-                val newDiskCache =
-                    DiskCache(File(diskCachePath), appVersion, diskMaxSize, encryptStrategy, encrypt)
-                mDiskCacheMap[cacheKey] = newDiskCache
-                newDiskCache
-            } else diskCache
+            return if (mDiskCache == null) {
+                mDiskCache =
+                    DiskCache(cacheFile, appVersion, diskMaxSize, encryptStrategy, encrypt)
+                mDiskCache!!
+            } else mDiskCache!!
+        } else {
+            cacheFile.mkdirs()
+            mDiskCache = DiskCache(cacheFile, appVersion, diskMaxSize, encryptStrategy, encrypt)
+            return mDiskCache!!
         }
-        val disk = DiskCache(File(diskCachePath), appVersion, diskMaxSize, encryptStrategy, encrypt)
-        mDiskCacheMap[cacheKey] = disk
-        return disk
+
     }
 
 }

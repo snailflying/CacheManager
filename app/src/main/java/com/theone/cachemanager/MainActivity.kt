@@ -31,27 +31,33 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        RxPermissions(this@MainActivity).request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            .subscribe { aboolean ->
-                if (aboolean!!) {
-                    // 用户已经同意该权限
-                    ACache.init(
-                        encryptStrategy = AesRsaEncrypt.getInstance(this@MainActivity),
-                        cachePath = Environment.getExternalStorageDirectory().absolutePath + "/ACache"
-                    )
-                    initData()
-                    initEvent()
-                } else {
-                    // 用户拒绝了该权限，没有选中『不再询问』（Never ask again）,那么下次再次启动时，还会提示请求权限的对话框
-                    Toast.makeText(
-                        this@MainActivity,
-                        "读写文件权限关闭，无法保存",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }.addTo(compositeDisposable)
+//        RxPermissions(this@MainActivity).request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+//            .subscribe { aboolean ->
+//                if (aboolean!!) {
+//                    // 用户已经同意该权限
+//                    ACache.init(
+//                        encryptStrategy = AesRsaEncrypt.getInstance(this@MainActivity),
+//                        cachePath = cacheDir.absolutePath + "/ACache"
+//                    )
+//                    initData()
+//                    initEvent()
+//                } else {
+//                    // 用户拒绝了该权限，没有选中『不再询问』（Never ask again）,那么下次再次启动时，还会提示请求权限的对话框
+//                    Toast.makeText(
+//                        this@MainActivity,
+//                        "读写文件权限关闭，无法保存",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                }
+//            }.addTo(compositeDisposable)
 
-
+        // 用户已经同意该权限
+        ACache.init(
+            encryptStrategy = AesRsaEncrypt.getInstance(this@MainActivity),
+            cachePath = cacheDir.absolutePath + "/ACache"
+        )
+        initData()
+        initEvent()
     }
 
     private fun initData() {

@@ -8,7 +8,7 @@
               tools:context=".MainActivity"
 >
 
-    <TextView
+    <Button
             android:id="@+id/main_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -16,7 +16,7 @@
             android:text="展示"
     />
 
-    <TextView
+    <Button
             android:id="@+id/main_text1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -24,7 +24,7 @@
             android:text="保存"
     />
 
-    <TextView
+    <Button
             android:id="@+id/main_text2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -32,7 +32,7 @@
             android:text="压力测试"
     />
 
-    <TextView
+    <Button
             android:id="@+id/main_text4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -41,7 +41,7 @@
             android:visibility="gone"
     />
 
-    <TextView
+    <Button
             android:id="@+id/main_text5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -49,14 +49,14 @@
             android:text="清理内存缓存(clearAllMemory方法)"
     />
 
-    <TextView
+    <Button
             android:id="@+id/main_text6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
             android:text="清理内存缓存和文件缓存(clearAll方法)"
     />
-    <TextView
+    <Button
             android:id="@+id/main_text7"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
