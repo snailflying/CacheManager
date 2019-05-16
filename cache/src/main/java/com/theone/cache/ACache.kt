@@ -33,17 +33,17 @@ object ACache {
      */
     @JvmStatic
     fun init(
-        cachePath: String,
-        appVersion: Int,
-        diskMaxSize: Long,
-        encryptStrategy: IEncrypt? = null,
+        cachePath: String = Environment.getDownloadCacheDirectory().absolutePath + "/ACache",
+        appVersion: Int = 1,
+        diskMaxSize: Long= DEFAULT_DISK_MAX_SIZE,
+        encryptStrategy: IEncrypt?,
         encrypt: Boolean = true
     ) {
         mCachePath = cachePath
         mAppVersion = appVersion
         mDiskMaxSize = diskMaxSize
         mEncryptStrategy = encryptStrategy
-        mEncrypt = encrypt;
+        mEncrypt = if (encryptStrategy != null) encrypt else false;
     }
 
     /**
