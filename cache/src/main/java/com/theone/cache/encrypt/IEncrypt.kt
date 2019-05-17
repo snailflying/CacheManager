@@ -11,11 +11,14 @@ import javax.crypto.Cipher
 interface IEncrypt {
 
     @Throws(Exception::class)
-    fun getCipher(key: String?, mode: Int): Cipher
+    fun getEncryptCipher(key: String?): Cipher
 
     @Throws(Exception::class)
-    fun encrypt(key: String, str: String): String
+    fun getDecryptCipher(key: String?): Cipher
 
     @Throws(Exception::class)
-    fun decrypt(key: String, str: String): String
+    fun encrypt(key: String?, plainText: String): String
+
+    @Throws(Exception::class)
+    fun decrypt(key: String?, encryptedText: String): String
 }

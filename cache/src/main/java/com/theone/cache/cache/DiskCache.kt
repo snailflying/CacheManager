@@ -424,7 +424,6 @@ class DiskCache @JvmOverloads constructor(
     }
 
     /**
-     * 如果password不为空则加密
      *
      * @param editor editor
      * @param password 加密密码
@@ -433,7 +432,7 @@ class DiskCache @JvmOverloads constructor(
         var outputStream = editor.newOutputStream(0) ?: return null
         //加密
         if (encrypt) {
-            initCipher(true)?.run {
+            initEncryptCipher()?.run {
                 outputStream = CipherOutputStream(outputStream, this)
             }
         }
@@ -442,7 +441,6 @@ class DiskCache @JvmOverloads constructor(
     }
 
     /**
-     * 如果password不为空则解密
      *
      * @param snapshot snapshot
      * @param password 加密密码
@@ -451,7 +449,7 @@ class DiskCache @JvmOverloads constructor(
         //解密
         var inputStream = snapshot.getInputStream(0) ?: return null
         if (decrypt) {
-            initCipher(false)?.run {
+            initDecryptCipher()?.run {
                 inputStream = CipherInputStream(inputStream, this)
             }
         }
@@ -464,12 +462,24 @@ class DiskCache @JvmOverloads constructor(
      *
      * @param key 加密Key
      */
-    private fun initCipher(isEncrypt: Boolean): Cipher? {
+
+
+    private fun initEncryptCipher(): Cipher? {
         return try {
-            val mode = if (isEncrypt) Cipher.ENCRYPT_MODE else Cipher.DECRYPT_MODE
-            iEncrypt?.getCipher(null, mode)
+            iEncrypt?.getEncryptCipher(null)
         } catch (e: Exception) {
             logw(mTag, e.toString())
+            e.printStackTrace()
+            null
+        }
+    }
+
+    private fun initDecryptCipher(): Cipher? {
+        return try {
+            iEncrypt?.getDecryptCipher(null)
+        } catch (e: Exception) {
+            logw(mTag, e.toString())
+            e.printStackTrace()
             null
         }
     }

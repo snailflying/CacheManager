@@ -1,6 +1,7 @@
 package com.theone.cache
 
 import android.os.Environment
+import android.util.Log
 import com.theone.cache.cache.Cache
 import com.theone.cache.cache.DiskCache
 import com.theone.cache.cache.MemoryCache
@@ -17,9 +18,9 @@ import java.io.File
  */
 object ACache {
 
-    private var mMemoryCache: MemoryCache? = null
-    private var mDiskCache: DiskCache? = null
-    private var cache: Cache? = null
+    private val mMemoryCacheMap: MutableMap<String, MemoryCache> = mutableMapOf()
+    private val mDiskCacheMap: MutableMap<String, DiskCache> = mutableMapOf()
+    private val M_CACHE_MAP: MutableMap<String, Cache> = mutableMapOf()
     private var mCachePath: String = Environment.getExternalStorageDirectory().absolutePath + "/ACache"
     private var mAppVersion: Int = 1
     private var mDiskMaxSize: Long = DEFAULT_DISK_MAX_SIZE
@@ -54,23 +55,41 @@ object ACache {
         memoryCache: MemoryCache = getMemoryCache(),
         diskCache: DiskCache = getDiskCache(encryptStrategy = mEncryptStrategy, encrypt = mEncrypt)
     ): Cache {
-        return if (cache == null) {
-            cache = Cache(memoryCache, diskCache, mEncrypt)
-            cache!!
-        } else cache!!
+        val cacheKey = "$memoryCache._$diskCache"
+        val cacheManager = M_CACHE_MAP[cacheKey]
+        return if (cacheManager == null) {
+            val newCacheManager = Cache(memoryCache, diskCache, mEncrypt)
+            M_CACHE_MAP[cacheKey] = newCacheManager
+            newCacheManager
+        } else cacheManager
+    }
+
+    /**
+     * 获取或者创建MemoryCache对象
+     */
+    @JvmOverloads
+    @JvmStatic
+    fun getMemoryCache(
+        memoryMaxSize: Int = DEFAULT_MEMORY_MAX_SIZE,
+        mode: MemoryCache.SizeMode = MemoryCache.SizeMode.Size
+    ): MemoryCache {
+        return getMemoryCache(memoryMaxSize.toString(), memoryMaxSize, mode)
     }
 
     /**
      * 获取或者创建MemoryCache对象
      */
     @JvmStatic
-    fun getMemoryCache(memoryMaxSize: Int = DEFAULT_MEMORY_MAX_SIZE,
+    fun getMemoryCache(
+        cacheKey: String, memoryMaxSize: Int = DEFAULT_MEMORY_MAX_SIZE,
         mode: MemoryCache.SizeMode = MemoryCache.SizeMode.Size
     ): MemoryCache {
-        return if (mMemoryCache == null) {
-            mMemoryCache = MemoryCache(memoryMaxSize, mode)
-            mMemoryCache!!
-        } else mMemoryCache!!
+        val memoryCache = mMemoryCacheMap[cacheKey]
+        return if (memoryCache == null) {
+            val newMemoryCache = MemoryCache(memoryMaxSize, mode)
+            mMemoryCacheMap[cacheKey] = newMemoryCache
+            newMemoryCache
+        } else memoryCache
     }
 
     /**
@@ -85,16 +104,19 @@ object ACache {
         encrypt: Boolean = mEncrypt
     ): DiskCache {
         val cacheFile = File(diskCachePath)
+        val cacheKey = "${diskCachePath}_$diskMaxSize"
         if (cacheFile.exists()) {
-            return if (mDiskCache == null) {
-                mDiskCache =
-                    DiskCache(cacheFile, appVersion, diskMaxSize, encryptStrategy, encrypt)
-                mDiskCache!!
-            } else mDiskCache!!
+            val diskCache = mDiskCacheMap[cacheKey]
+            return if (diskCache == null) {
+                val newDiskCache =
+                    DiskCache(File(diskCachePath), appVersion, diskMaxSize, encryptStrategy, encrypt)
+                mDiskCacheMap[cacheKey] = newDiskCache
+                newDiskCache
+            } else diskCache
         } else {
-            cacheFile.mkdirs()
-            mDiskCache = DiskCache(cacheFile, appVersion, diskMaxSize, encryptStrategy, encrypt)
-            return mDiskCache!!
+            val disk = DiskCache(File(diskCachePath), appVersion, diskMaxSize, encryptStrategy, encrypt)
+            mDiskCacheMap[cacheKey] = disk
+            return disk
         }
 
     }
