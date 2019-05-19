@@ -5,16 +5,16 @@
 
 # 特点
 + 二级缓存
-	+ 内存缓存（采用SoftReference和LruCache，防止内存溢出）
-	+ 文件缓存（由ASimpleCache实现）
+	+ 内存缓存（采用LruCache实现）
+	+ 文件缓存（由DiskLruCache实现）
 + 默认使用SD卡缓存
     + getCacheDir()获取的缓存文件较容易被删除
     + 大于1M的缓存文件，google建议使用getExternalCacheDir()缓存存储
     + 默认存储位置为app数据缓存位置
-	    + 为处理防止被删除，在数据库文件夹下创建cachemanage文件夹，数据存储在该文件夹下
+	    + 为处理防止被删除，在数据库文件夹下创建ACache文件夹，数据存储在该文件夹下
 + 支持文件加密存储
-    + 默认des3加密内容
-    + 默认生成des3唯一密钥（建议使用默认生成的密钥）
+    + 默认Rsa加密内容
+    + 默认生成Rsa唯一密钥（建议使用默认生成的密钥）
         + 默认生成的默认密钥，每个客户端都是唯一的，互不相同
         + 默认密钥存储在KeyStore中，防逆向工程获取密钥
 + 支持基本数据类型、String、JSONObject、JSONArray、实体对象（Test类）
