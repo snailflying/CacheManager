@@ -29,6 +29,20 @@
 
 # 使用方法
 #### 
+```
+//初始化
+ACache.init(
+            encryptStrategy = RsaEncrypt.getInstance(this@MainActivity),
+            cachePath = cacheDir.absolutePath + "/ACache",
+            encrypt = true
+        )
+//存数据
+ACache.getCache().putString("key1", "测试数据1")
+//取数据
+val key1Value = ACache.getCache().getString("key1")
+
+```
+具体方法见Demo
 	
 # 项目添加方法
 

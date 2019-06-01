@@ -30,6 +30,11 @@ object ACache {
 
     /**
      * 初始化默认的缓存参数
+     * @param cachePath String 路径
+     * @param appVersion Int 版本
+     * @param diskMaxSize Long 缓存空间大小
+     * @param encryptStrategy IEncrypt? 加密算法
+     * @param encrypt Boolean 默认是否加密
      */
     @JvmStatic
     fun init(
@@ -37,7 +42,7 @@ object ACache {
         appVersion: Int = 1,
         diskMaxSize: Long = DEFAULT_DISK_MAX_SIZE,
         encryptStrategy: IEncrypt?,
-        encrypt: Boolean = true
+        encrypt: Boolean = false
     ) {
         mCachePath = cachePath
         mAppVersion = appVersion
