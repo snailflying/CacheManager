@@ -36,6 +36,7 @@ class AesRsaEncrypt
 private constructor(context: Context) : IEncrypt {
     private val mContext: Context = context.applicationContext
     private var keyStore: KeyStore? = null
+    private var secretKeySpec: SecretKeySpec? = null
 
     private val ivParameterSpec: IvParameterSpec
         @Throws(Exception::class)
@@ -136,16 +137,20 @@ private constructor(context: Context) : IEncrypt {
 
     @Throws(Exception::class)
     private fun getAESKeySpec(key: String?): SecretKeySpec {
-
-        val aesKey: ByteArray
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            val encryptedKey = getAESKey(mContext)
-            aesKey = decryptRSA(encryptedKey)
+        return if (secretKeySpec != null) {
+            secretKeySpec!!
         } else {
-            aesKey = getKey(key)
+            val aesKey: ByteArray
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                val encryptedKey = getAESKey(mContext)
+                aesKey = decryptRSA(encryptedKey)
+            } else {
+                aesKey = getKey(key)
+            }
+            secretKeySpec = SecretKeySpec(aesKey, TYPE_AES)
+            secretKeySpec!!
         }
 
-        return SecretKeySpec(aesKey, TYPE_AES)
     }
 
     //keyLenth:密钥长度 需要*8  取值只能为 16 24 32 对应密钥长度为128、192、256
