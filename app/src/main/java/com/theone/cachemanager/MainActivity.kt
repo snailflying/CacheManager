@@ -8,6 +8,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import com.theone.cache.ACache
+import com.theone.cache.encrypt.AesRsaEncrypt
 import com.theone.cache.encrypt.RsaEncrypt
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
@@ -29,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         // 用户已经同意该权限
         ACache.init(
-            encryptStrategy = RsaEncrypt.getInstance(this@MainActivity),
+            encryptStrategy = AesRsaEncrypt.getInstance(this@MainActivity),
             cachePath = cacheDir.absolutePath + "/ACache",
             encrypt = true
         )
@@ -55,7 +56,7 @@ class MainActivity : AppCompatActivity() {
 
             val key1Value = ACache.getCache().getString("key1")
             val key2Value = ACache.getCache().getString("key2", "default")
-            val key2ValueEncrypt = ACache.getCache().getString("key2", "default", decrypt = false)
+            val key2ValueEncrypt = ACache.getCache().getString("key2", "default", decrypt = true)
             val key3Value = ACache.getCache().getString("key3", "default")
             val key4Value = ACache.getCache().getString("key4", "default")
             val key5Test = ACache.getCache().getSerializable("key5", Test(115, "aaron5"))//可能为null
