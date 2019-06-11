@@ -1,7 +1,6 @@
 package com.theone.cache
 
 import android.os.Environment
-import android.util.Log
 import com.theone.cache.cache.Cache
 import com.theone.cache.cache.DiskCache
 import com.theone.cache.cache.MemoryCache
@@ -110,9 +109,9 @@ object ACache {
     ): DiskCache {
         val cacheFile = File(diskCachePath)
         val cacheKey = "${diskCachePath}_$diskMaxSize"
-        if (cacheFile.exists()) {
+        return if (cacheFile.exists()) {
             val diskCache = mDiskCacheMap[cacheKey]
-            return if (diskCache == null) {
+            if (diskCache == null) {
                 val newDiskCache =
                     DiskCache(File(diskCachePath), appVersion, diskMaxSize, encryptStrategy, encrypt)
                 mDiskCacheMap[cacheKey] = newDiskCache
@@ -121,7 +120,7 @@ object ACache {
         } else {
             val disk = DiskCache(File(diskCachePath), appVersion, diskMaxSize, encryptStrategy, encrypt)
             mDiskCacheMap[cacheKey] = disk
-            return disk
+            disk
         }
 
     }

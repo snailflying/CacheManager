@@ -6,6 +6,7 @@ import android.os.Build
 import android.security.KeyPairGeneratorSpec
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import java.io.ByteArrayOutputStream
 import java.math.BigInteger
 import java.security.*
 import java.security.spec.RSAKeyGenParameterSpec
@@ -54,57 +55,82 @@ class RsaEncrypt private constructor(context: Context) : IEncrypt {
 
     @Throws(Exception::class)
     override fun getEncryptCipher(key: String?): Cipher {
+        val keySpec = getKeySpec(key)
+
+        val cipher = Cipher.getInstance(AES_GCM_NO_PADDING)
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivParameterSpec)
+        return cipher
+
+    }
+
+    @Throws(Exception::class)
+    override fun getDecryptCipher(key: String?): Cipher {
+        val keySpec = getKeySpec(key)
+        val cipher = Cipher.getInstance(AES_GCM_NO_PADDING)
+        cipher.init(Cipher.DECRYPT_MODE, keySpec, ivParameterSpec)
+        return cipher
+
+    }
+
+
+    @Throws(Exception::class)
+    fun getPrivateEncryptCipher(key: String?): Cipher {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             val publicKey = keyStore!!.getCertificate(KEYSTORE_ALIAS).publicKey
 
             val cipher = Cipher.getInstance(RSA_ECB_PKCS1PADDING)
             cipher.init(Cipher.ENCRYPT_MODE, publicKey)
             cipher
-        } else{
+        } else {
             val keySpec = getKeySpec(key)
 
             val cipher = Cipher.getInstance(AES_GCM_NO_PADDING)
-            cipher.init(Cipher.ENCRYPT_MODE, keySpec,ivParameterSpec)
+            cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivParameterSpec)
             cipher
         }
 
     }
 
     @Throws(Exception::class)
-    override fun getDecryptCipher(key: String?): Cipher {
+    fun getPrivateDecryptCipher(key: String?): Cipher {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             val privateKey = keyStore!!.getKey(KEYSTORE_ALIAS, null) as PrivateKey
             val cipher = Cipher.getInstance(RSA_ECB_PKCS1PADDING)
             cipher.init(Cipher.DECRYPT_MODE, privateKey)
             cipher
-        } else{
-            val keySpec =  getKeySpec(key)
+        } else {
+            val keySpec = getKeySpec(key)
             val cipher = Cipher.getInstance(AES_GCM_NO_PADDING)
-            cipher.init(Cipher.DECRYPT_MODE, keySpec,ivParameterSpec)
+            cipher.init(Cipher.DECRYPT_MODE, keySpec, ivParameterSpec)
             cipher
         }
 
     }
 
-
-
     @Throws(Exception::class)
     override fun encrypt(key: String?, plainText: String): String {
 
-        val cipher = getEncryptCipher(key)
+        val cipher = getPrivateEncryptCipher(key)
 
-        val encryptedByte = cipher.doFinal(plainText.toByteArray())
-        return Base64Util.encode(encryptedByte)
+        return if (needSplit(plainText)) {
+            String(rsaSplitEncryptByPub(DEFAULT_RSA_KEY_LENGTH, plainText.toByteArray(), cipher))
+        } else {
+            val encryptedByte = cipher.doFinal(plainText.toByteArray())
+            Base64Util.encode(encryptedByte)
+        }
     }
 
     @Throws(Exception::class)
     override fun decrypt(key: String?, encryptedText: String): String {
 
-        val cipher = getDecryptCipher(key)
+        val cipher = getPrivateDecryptCipher(key)
 
         val decryptedBytes = Base64Util.decode(encryptedText)
-
-        return String(cipher.doFinal(decryptedBytes))
+        return if (needSplit(encryptedText)) {
+            String(rsaSplitDecryptByPri(DEFAULT_RSA_KEY_LENGTH, decryptedBytes, cipher))
+        } else {
+            String(cipher.doFinal(decryptedBytes))
+        }
     }
 
     @Throws(NoSuchProviderException::class, NoSuchAlgorithmException::class, InvalidAlgorithmParameterException::class)
@@ -172,7 +198,7 @@ class RsaEncrypt private constructor(context: Context) : IEncrypt {
                 alias,
                 KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
             ).setAlgorithmParameterSpec(
-                RSAKeyGenParameterSpec(1024, RSAKeyGenParameterSpec.F4)
+                RSAKeyGenParameterSpec(DEFAULT_RSA_KEY_LENGTH, RSAKeyGenParameterSpec.F4)
             )
                 .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
@@ -207,6 +233,101 @@ class RsaEncrypt private constructor(context: Context) : IEncrypt {
         }
     }
 
+    private fun needSplit(plainText: String): Boolean {
+        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && plainText.length > getMaxCleartextLen(DEFAULT_RSA_KEY_LENGTH))
+    }
+
+    /**
+     * RSA使用私钥 分段解密
+     *
+     * @param keyLength
+     * @param data
+     * @param privateKey
+     * @param isEncrypt
+     * @param transformation
+     */
+    private fun rsaSplitDecryptByPri(
+        keyLength: Int = DEFAULT_RSA_KEY_LENGTH,
+        data: ByteArray,
+        cipher: Cipher
+    ): ByteArray {
+        //分段明文长度
+        val cleartextLen = getMaxCleartextLen(keyLength)
+        //密钥长度
+        val keyLen = keyLength / 8
+        //计算分段加密的block数 (向上取整) ，如果余数非0，block数再加1
+        val blockSize = if (data.size % cleartextLen == 0) data.size / cleartextLen else data.size / cleartextLen + 1
+        // 输出buffer
+        val outBuffer = ByteArrayOutputStream(blockSize * cleartextLen)
+
+        return try {
+            //解密
+            outBuffer.use {
+                for (offset in 0 until data.size step keyLen) {
+                    // block大小: keyLen 或剩余字节数
+                    val inputLen = if (data.size - offset > keyLen) keyLen else data.size - offset
+                    // 得到分段加密结果
+                    val decryptedBlock = cipher.doFinal(data, offset, inputLen)
+                    // 追加结果到输出buffer中
+                    outBuffer.write(decryptedBlock, 0, decryptedBlock.size)
+                }
+                return outBuffer.toByteArray()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyArray<Byte>().toByteArray()
+        }
+    }
+
+    /**
+     * RSA使用公钥 分段加密
+     *
+     * @param keyLength
+     * @param data
+     * @param publicKey
+     * @param isEncrypt
+     * @param transformation
+     */
+    private fun rsaSplitEncryptByPub(
+        keyLength: Int = DEFAULT_RSA_KEY_LENGTH,
+        data: ByteArray,
+        cipher: Cipher
+    ): ByteArray {
+        //分段明文长度
+        val cleartextLen = getMaxCleartextLen(keyLength)
+        //密钥长度
+        val keyLen = keyLength / 8
+        //计算分段加密的block数 (向上取整) ，如果余数非0，block数再加1
+        val blockSize = if (data.size % cleartextLen == 0) data.size / cleartextLen else data.size / cleartextLen + 1
+        // 输出buffer, 大小为blockSize个keyLen
+        val outBuffer = ByteArrayOutputStream(blockSize * keyLen)
+        return try {
+            //加/解密
+            outBuffer.use {
+                for (offset in 0 until data.size step cleartextLen) {
+                    // block大小: blockSize 或剩余字节数
+                    val inputLen = if (data.size - offset > cleartextLen) cleartextLen else data.size - offset
+                    // 得到分段加密结果
+                    val encryptedBlock = cipher.doFinal(data, offset, inputLen)
+                    // 追加结果到输出buffer中
+                    outBuffer.write(encryptedBlock, 0, encryptedBlock.size)
+                }
+                return outBuffer.toByteArray()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyArray<Byte>().toByteArray()
+        }
+    }
+
+    /**
+     * 获取最大的明文长度
+     *
+     * @param keyLength 密钥长度
+     */
+    private fun getMaxCleartextLen(keyLength: Int): Int = keyLength / 8 - 11
+
 
     companion object : SingletonHolder<RsaEncrypt, Context>(::RsaEncrypt) {
         val TAG = "AesRsaUtil"
@@ -218,5 +339,6 @@ class RsaEncrypt private constructor(context: Context) : IEncrypt {
         val TYPE_AES = "AES"
         val AES_GCM_NO_PADDING = "AES/GCM/NoPadding"
         val RSA_ECB_PKCS1PADDING = "RSA/ECB/PKCS1Padding"
+        const val DEFAULT_RSA_KEY_LENGTH = 1024
     }
 }
